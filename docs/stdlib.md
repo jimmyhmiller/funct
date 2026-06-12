@@ -4,7 +4,7 @@ Every function below is available globally in any funct program (they come from
 the prelude, installed at engine startup). Because of UFCS and pipes, every one
 can be called three ways:
 
-```text
+```rust
 len(xs)        xs.len()        xs |> len
 push(xs, 1)    xs.push(1)      xs |> push(1)
 ```

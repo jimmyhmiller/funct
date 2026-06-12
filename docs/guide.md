@@ -71,7 +71,7 @@ original is untouched. The single exception is the [atom](#atoms).
 Equality is **structural** for everything except atoms, which compare by
 identity:
 
-```text
+```rust
 [1, 2] == [1, 2]          // true
 { x: 1 } == { x: 1 }      // true
 Some(1) == Some(1)        // true
@@ -83,7 +83,7 @@ let a = atom(1); a == a   // true  — same cell
 
 ## Literals
 
-```text
+```rust
 42            1_000_000        // ints; `_` separators are ignored
 3.14          1.0              // floats
 true   false                  // bools
@@ -95,7 +95,7 @@ true   false                  // bools
 `{` or `}` is an ordinary character — only `${` begins interpolation — so
 brace-heavy text like JSON needs no escaping:
 
-```text
+```rust
 let name = "ada"
 "hi ${name}!"             // "hi ada!"
 "1 + 2 = ${1 + 2}"        // "1 + 2 = 3"
@@ -107,7 +107,7 @@ let name = "ada"
 
 Strings are indexed and measured by **character**, not byte:
 
-```text
+```rust
 "hello"[1]                // "e"
 len("héllo")             // 5
 ```
@@ -119,7 +119,7 @@ len("héllo")             // 5
 **Arithmetic** — `+ - * / % **`. `**` is exponent and is right-associative;
 unary minus binds tighter than `**`.
 
-```text
+```rust
 2 + 3 * 4                 // 14
 2 ** 3 ** 2               // 512   (right assoc: 2 ** (3 ** 2))
 -2 ** 2                   // 4      ((-2) ** 2)
@@ -139,7 +139,7 @@ and `!=` work on any values (structural; see above).
 **Boolean** — `and`, `or`, `not`. `and`/`or` short-circuit, and conditions must
 be real `Bool`s (there is no truthiness):
 
-```text
+```rust
 false and (1 / 0 == 0)    // false — right side never runs
 if 1 { 2 }                // ERROR: condition must be Bool
 ```
@@ -152,7 +152,7 @@ if 1 { 2 }                // ERROR: condition must be Bool
 
 `let` binds an immutable name. Re-binding the same name (shadowing) is allowed:
 
-```text
+```rust
 let x = 1
 let x = x + 1     // x is now 2 (a new binding)
 ```
@@ -161,7 +161,7 @@ Mutable locals use `let mut`, and exist **only inside functions** — there is n
 mutable top-level state (use an [atom](#atoms) for that). Assignment uses `=`
 and the compound `+=`:
 
-```text
+```rust
 fn f() {
     let mut x = 1
     x = x + 1
@@ -175,7 +175,7 @@ is an error that points you to atoms.
 
 **Destructuring** works in `let` (and function parameters and `for`):
 
-```text
+```rust
 let (a, b) = (1, 2)
 let [x, y, z] = [1, 2, 3]
 let { x, y } = { x: 1, y: 2 }
@@ -188,7 +188,7 @@ let { x, y } = { x: 1, y: 2 }
 A `{ ... }` block evaluates to its last expression. A block with no trailing
 expression is `Unit`.
 
-```text
+```rust
 let y = {
     let a = 2
     a * 3
@@ -205,7 +205,7 @@ let y = {
 
 Two forms: `=` for an expression body, `{ }` for a block body.
 
-```text
+```rust
 fn double(x) = x * 2
 fn add(a, b) {
     a + b
@@ -215,7 +215,7 @@ fn add(a, b) {
 Functions may be **forward-referenced** (declaration order doesn't matter) and
 recursive:
 
-```text
+```rust
 fn a() = b() + 1
 fn b() = 41           // a() == 42
 
@@ -224,7 +224,7 @@ fn fib(n) = if n < 2 { n } else { fib(n - 1) + fib(n - 2) }
 
 `return` exits early:
 
-```text
+```rust
 fn f(x) {
     if x > 10 { return 100 }
     x
@@ -233,7 +233,7 @@ fn f(x) {
 
 Parameters can be **patterns** (destructuring):
 
-```text
+```rust
 fn first((a, _)) = a
 fn norm({ x, y }) = x * x + y * y
 ```
@@ -249,7 +249,7 @@ stack (`sum_to(50000)` works), though it does allocate.
 
 `=>` makes a lambda. Closures capture surrounding bindings.
 
-```text
+```rust
 let f = x => x + 1
 let g = (x, y) => x * y
 let h = () => 42
@@ -262,7 +262,7 @@ let k = x => {              // block body
 Captured immutable bindings are captured by value. A captured `let mut`
 slot is **shared** — closures see each other's updates:
 
-```text
+```rust
 fn make_counter() {
     let mut n = 0
     () => { n = n + 1; n }
@@ -285,7 +285,7 @@ fn make() {
 `x |> f` feeds `x` as the first argument of `f`. `x |> f(a)` becomes
 `f(x, a)`. Both are just sugar, so any function works as a method too.
 
-```text
+```rust
 5 |> double               // double(5)
 5 |> add(3)               // add(5, 3) == 8
 [1, 2, 3, 4]
@@ -296,7 +296,7 @@ fn make() {
 
 Use `_` as a **placeholder** to pipe into a different argument position:
 
-```text
+```rust
 3  |> sub(10, _)          // sub(10, 3)
 10 |> sub(_, 3)           // sub(10, 3)
 ```
@@ -306,7 +306,7 @@ You can also pipe into a [variant constructor](#variants-and-types):
 
 **UFCS** method syntax is the same idea: `x.f(a)` means `f(x, a)`.
 
-```text
+```rust
 5.double()                // double(5)
 [1, 2, 3].len()           // 3
 (2.25).sqrt()             // sqrt(2.25)
@@ -315,7 +315,7 @@ You can also pipe into a [variant constructor](#variants-and-types):
 When `x` is a record that actually **has** a field named `f`, field access wins
 over UFCS:
 
-```text
+```rust
 let r = { double: x => x * 3 }
 r.double(5)               // 15 — calls the stored closure, not a global
 ```
@@ -327,7 +327,7 @@ r.double(5)               // 15 — calls the stored closure, not a global
 **Lists** are immutable sequences. Index with `[i]` (out of bounds faults);
 concatenate with `+`; grow with `push` (returns a new list).
 
-```text
+```rust
 [1, 2, 3][1]              // 2
 [1, 2] + [3]              // [1, 2, 3]
 push([1], 2)              // [1, 2]
@@ -335,7 +335,7 @@ push([1], 2)              // [1, 2]
 
 **Tuples** are fixed-size and indexed positionally:
 
-```text
+```rust
 (1, "a", true)[2]         // true
 ```
 
@@ -343,7 +343,7 @@ push([1], 2)              // [1, 2]
 `{ k }` shorthand, and update with spread `{ ..base, k: v }` (which returns a
 new record — the original is unchanged):
 
-```text
+```rust
 let p = { x: 1, y: 2 }
 p.x + p.y                 // 3
 
@@ -363,7 +363,7 @@ See the stdlib for `keys`, `values`, `entries`, `has`, `get`, `assoc`,
 `a..b` is half-open (excludes `b`); `a..=b` is inclusive. Ranges are lazy —
 materialize with `to_list`, iterate in a `for`, or map over them.
 
-```text
+```rust
 to_list(1..4)             // [1, 2, 3]
 to_list(1..=4)            // [1, 2, 3, 4]
 1..=3 |> map(x => x * 10) // [10, 20, 30]
@@ -377,14 +377,14 @@ for x in 1..=10 { ... }
 **`if` / `else`** is an expression; the condition must be a `Bool`. An `if`
 with no `else` that doesn't run yields `Unit`.
 
-```text
+```rust
 if 1 < 2 { "yes" } else { "no" }
 fn grade(n) = if n > 89 { "A" } else if n > 79 { "B" } else { "C" }
 ```
 
 **`while`** loops while its condition holds:
 
-```text
+```rust
 let mut i = 0
 while i < 5 { i = i + 1 }
 ```
@@ -393,7 +393,7 @@ There is no dedicated `loop` keyword; write `while true { ... break }`.
 
 **`for ... in`** iterates lists, ranges, and strings, and can destructure:
 
-```text
+```rust
 for x in [1, 2, 3] { ... }
 for x in 1..=10 { ... }
 for c in "abc" { ... }              // c is each character as a Str
@@ -405,7 +405,7 @@ They affect the nearest enclosing loop only; a lambda defined inside a loop
 **cannot** break it (that's a compile error). `break`/`continue` outside a loop
 is a compile error.
 
-```text
+```rust
 for x in 1..=100 {
     if x > 4 { break }
     if x % 2 == 0 { continue }
@@ -420,7 +420,7 @@ for x in 1..=100 {
 `match` tries arms top to bottom and evaluates the first that matches. If none
 match it **faults** (`no pattern matched`).
 
-```text
+```rust
 match 2 {
     1 => "one",
     2 => "two",
@@ -430,7 +430,7 @@ match 2 {
 
 Patterns include:
 
-```text
+```rust
 // variants (record-style and positional)
 match s {
     Circle { radius } => 3.14 * radius * radius,
@@ -478,7 +478,7 @@ match ({ x: 1, y: 2 }) {
 A **subjectless** `match { ... }` is an anonymous one-argument function — handy
 to name a classifier or drop into a pipe:
 
-```text
+```rust
 let classify = match {
     0 => "zero",
     n if n > 0 => "pos",
@@ -496,7 +496,7 @@ A **variant** is a tagged value. Variant tags are dynamic — any capitalized
 name followed by `{ ... }` (named fields) or `( ... )` (positional fields)
 constructs one. You don't have to declare anything first:
 
-```text
+```rust
 Circle { radius: 2.0 }    // named-field variant, tag "Circle"
 Pair(1, 2)                // positional variant, tag "Pair"
 ```
@@ -511,7 +511,7 @@ A `type` declaration documents a sum type but creates **no runtime binding**
 (tags are dynamic, annotations are discarded). It's useful as documentation and
 to keep match arms readable:
 
-```text
+```rust
 type Shape = Circle { radius: Float } | Square { side: Float } | Point
 ```
 
@@ -522,7 +522,7 @@ type Shape = Circle { radius: Float } | Square { side: Float } | Point
 There are no exceptions for ordinary errors. Functions return `Ok(v)`/`Err(e)`
 or `Some(v)`/`None`, and `?` propagates the failure case:
 
-```text
+```rust
 fn safe_div(a, b) = if b == 0 { Err("div by zero") } else { Ok(a / b) }
 
 fn calc(a, b) {
@@ -535,7 +535,7 @@ calc(1, 0)                     // Err("div by zero")
 
 `?` works on `Option` too — it unwraps `Some` or returns `None` early:
 
-```text
+```rust
 fn first_doubled(xs) {
     let h = head(xs)?
     Some(h * 2)
@@ -556,7 +556,7 @@ rather than being caught — the equivalent of a panic.
 An **atom** is the only mutable, escaping cell in the language. Everything else
 is immutable, so all shared mutable state goes through atoms.
 
-```text
+```rust
 let a = atom(41)
 @a                        // 41   — @a is sugar for deref(a)
 @a + 1                    // 42
@@ -573,7 +573,7 @@ stable identity through closures and snapshots.
 
 **Watchers** fire after each successful mutation, receiving `(old, new)`:
 
-```text
+```rust
 let log = atom([])
 watch(a, "key", (old, new) => swap!(log, xs => push(xs, (old, new))))
 unwatch(a, "key")
@@ -585,7 +585,7 @@ the pure `get_in`/`assoc_in`/`update_in` — see the [stdlib](stdlib.md).
 A common pattern: copy the atom out, build a new value functionally, write it
 back.
 
-```text
+```rust
 let s = @state
 reset!(state, { ..s, score: s.score + 1 })
 ```
@@ -599,14 +599,14 @@ module root (the script's directory via the CLI, or `vm.set_module_root(..)`
 when embedded). Only `export`ed items are importable, and **imports are
 explicit only — there is no wildcard import**.
 
-```text
+```rust
 // math/vec.ft
 export fn lerp(a, b, t) = a + (b - a) * t
 export let origin = (0.0, 0.0)
 fn helper(x) = ...                       // module-private
 ```
 
-```text
+```rust
 import { lerp, clamp } from "math/vec"   // named
 import { lerp as mix } from "math/vec"   // renamed
 import "math/vec" as vec                 // qualified: vec.lerp(...)
@@ -626,7 +626,7 @@ across importers), import cycles are detected and reported with the chain, and
 Annotate any zero-argument function with `#[test]` — beside the code it tests or
 in a separate file — and run `funct test <file-or-dir>`:
 
-```text
+```rust
 export fn area(s) = ...
 
 #[test]
@@ -651,7 +651,7 @@ When funct is embedded, the host program registers native functions and
 injects globals. A script declares what it expects from the host with `extern`,
 so it stays compilable and testable on its own:
 
-```text
+```rust
 extern let canvas_w                       // a host-provided global value
 extern fn request_render()                // a host-provided native function
 extern fn mask_paint(name, x, y, r, v)
@@ -664,7 +664,7 @@ pure-logic tests in a widget file run fine under `funct test` without a host.
 Externs are part of a module's export surface, so a shared interface file can be
 pulled in by any import form:
 
-```text
+```rust
 import "host"                             // bare: brings in the whole surface
 import { mask_paint } from "host"         // named
 import { mask_paint as paint } from "host"
@@ -678,14 +678,14 @@ functions; snapshots), see the [README](../README.md).
 
 ## Comments and statement separators
 
-```text
+```rust
 // line comments run to end of line
 1 + 1 // trailing comments are fine
 ```
 
 Statements are separated by newlines or `;`:
 
-```text
+```rust
 fn f() { let a = 1; let b = 2; a + b }
 ```
 
