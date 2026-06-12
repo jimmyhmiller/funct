@@ -822,10 +822,8 @@ impl Funct {
                             return RunResult::Paused(Cause::Breakpoint(line));
                         }
                     }
-                    StopWhen::NextLine => {
-                        if line != start_line && st.depth() <= start_depth {
-                            return RunResult::Paused(Cause::NextLine(line));
-                        }
+                    StopWhen::NextLine if line != start_line && st.depth() <= start_depth => {
+                        return RunResult::Paused(Cause::NextLine(line));
                     }
                     _ => {}
                 }
