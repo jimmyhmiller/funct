@@ -1,6 +1,6 @@
 [package]
 name = "funct"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Jimmy Miller <jimmyhmiller@gmail.com>"]
 description = "A small, functional, embeddable scripting language with a fully reified bytecode VM you can pause, snapshot, and resume."
